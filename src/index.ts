@@ -23,13 +23,12 @@ type ComicDetailPayload = BasePayload & {
   comicId?: string;
 };
 
-type ReadSnapshotPayload = {
+type ReadSnapshotPayload = BasePayload & {
   comicId?: string;
   chapterId?: string;
-  extern?: Record<string, unknown>;
 };
 
-type FetchImagePayload = {
+type FetchImagePayload = BasePayload & {
   url?: string;
   timeoutMs?: number;
 };
