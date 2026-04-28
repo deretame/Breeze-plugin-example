@@ -12,9 +12,6 @@ import { buildPluginInfo } from "./get-info";
 
 type BasePayload = {
   extern?: Record<string, unknown>;
-  path?: string;
-  useJwt?: boolean;
-  jwtToken?: string;
 };
 
 type SearchPayload = BasePayload & {
@@ -129,10 +126,10 @@ async function getComicDetail(payload: ComicDetailPayload = {}) {
           url: NOT_FOUND_IMAGE_URL,
           name: "avatar",
           path: "creator/avatar.jpg",
-          extension: {},
+          extern: {},
         }),
         onTap: {},
-        extension: {},
+        extern: {},
       },
       description: normalizedInfo.description,
       cover: createImage({
@@ -140,7 +137,7 @@ async function getComicDetail(payload: ComicDetailPayload = {}) {
         url: NOT_FOUND_IMAGE_URL,
         name: `${normalizedInfo.id}.jpg`,
         path: `comic/${normalizedInfo.id}/cover.jpg`,
-        extension: {},
+        extern: {},
       }),
       metadata: [
         createMetadataActionList(
@@ -155,13 +152,13 @@ async function getComicDetail(payload: ComicDetailPayload = {}) {
         createMetadataActionList("works", "作品", normalizedInfo.works),
         createMetadataActionList("actors", "角色", normalizedInfo.actors),
       ],
-      extension: {},
+      extern: {},
     },
     eps: normalizedInfo.series.map((item) => ({
       id: String(item.id),
       name: String(item.name),
       order: Number(item.order),
-      extension: {
+      extern: {
         sort: Number(item.rawOrder),
       },
     })),
@@ -175,7 +172,7 @@ async function getComicDetail(payload: ComicDetailPayload = {}) {
     allowLike: false,
     allowCollected: false,
     allowDownload: false,
-    extension: {},
+    extern: {},
   };
 
   const scheme = {
@@ -249,23 +246,23 @@ async function getReadSnapshot(payload: ReadSnapshotPayload = {}) {
         description: String(comicInfo.description ?? ""),
         cover: {
           ...toStringMap(comicInfo.cover),
-          extern: toStringMap(toStringMap(comicInfo.cover).extension),
+          extern: toStringMap(toStringMap(comicInfo.cover).extern),
         },
         creator: {
           ...toStringMap(comicInfo.creator),
           avatar: {
             ...toStringMap(toStringMap(comicInfo.creator).avatar),
             extern: toStringMap(
-              toStringMap(toStringMap(comicInfo.creator).avatar).extension,
+              toStringMap(toStringMap(comicInfo.creator).avatar).extern,
             ),
           },
-          extern: toStringMap(toStringMap(comicInfo.creator).extension),
+          extern: toStringMap(toStringMap(comicInfo.creator).extern),
         },
         titleMeta: Array.isArray(comicInfo.titleMeta)
           ? comicInfo.titleMeta
           : [],
         metadata: Array.isArray(comicInfo.metadata) ? comicInfo.metadata : [],
-        extern: toStringMap(comicInfo.extension),
+        extern: toStringMap(comicInfo.extern),
       },
       chapter: {
         id: chapterId,

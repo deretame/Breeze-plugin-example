@@ -10,13 +10,12 @@
     "dev": "pnpm dev:serve",
     "dev:serve": "tsx dev-server.ts"
   },
-  "dependencies": {},
   "devDependencies": {
-    "@rspack/cli": "^1.5.7",
-    "@rspack/core": "^1.5.7",
-    "@types/node": "^24.6.0",
+    "@rspack/cli": "^2.0.1",
+    "@rspack/core": "^2.0.1",
+    "@types/node": "^25.6.0",
     "cross-env": "^10.1.0",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
   }
 }
