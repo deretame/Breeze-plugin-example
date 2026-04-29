@@ -31,6 +31,8 @@ type ReadSnapshotPayload = BasePayload & {
 type FetchImagePayload = BasePayload & {
   url?: string;
   timeoutMs?: number;
+  taskGroupKey?: string;
+  extern?: Record<string, unknown>;
 };
 
 function openSearchAction(keyword: string) {

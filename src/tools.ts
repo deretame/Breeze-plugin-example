@@ -24,6 +24,11 @@ export const pluginConfig = {
 
 export const runtime = {
   gc: () => bridge.call("runtime.gc") as Promise<void>,
+  isTaskGroupCancelled: (taskGroupKey: string) =>
+    bridge.call(
+      "runtime.is_task_group_cancelled",
+      taskGroupKey,
+    ) as Promise<boolean>,
 };
 
 interface ToastOptions {
