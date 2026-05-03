@@ -31,6 +31,18 @@ export const runtime = {
     ) as Promise<boolean>,
 };
 
+export const opencc = {
+  convert: (
+    text: string,
+    config: "s2t" | "t2s" | "s2tw" | "tw2s" | "s2hk" | "hk2s",
+  ) => {
+    return bridge.call(
+      "opencc.convert",
+      JSON.stringify({ text, config }),
+    ) as Promise<string>;
+  },
+};
+
 interface ToastOptions {
   message: string;
   title?: string;

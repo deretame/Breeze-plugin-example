@@ -1,6 +1,7 @@
 import {
   NOT_FOUND_IMAGE_URL,
   PLUGIN_ID,
+  SettingsBundleContract,
   createActionItem,
   createComicItem,
   createImage,
@@ -291,7 +292,7 @@ async function fetchImageBytes({
   };
 }
 
-async function getSettingsBundle() {
+async function getSettingsBundle(): Promise<SettingsBundleContract> {
   return {
     source: PLUGIN_ID,
     scheme: {
