@@ -287,9 +287,7 @@ async function fetchImageBytes({
     throw new Error("url 不能为空");
   }
   void timeoutMs;
-  return {
-    nativeBufferId: 0,
-  };
+  return new Uint8Array(new ArrayBuffer(0));
 }
 
 async function getSettingsBundle(): Promise<SettingsBundleContract> {
