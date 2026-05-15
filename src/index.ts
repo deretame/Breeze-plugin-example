@@ -24,6 +24,11 @@ type ComicDetailPayload = BasePayload & {
   comicId?: string;
 };
 
+type ChapterPayload = BasePayload & {
+  comicId?: string;
+  chapterId?: string;
+};
+
 type ReadSnapshotPayload = BasePayload & {
   comicId?: string;
   chapterId?: string;
@@ -45,6 +50,64 @@ function openSearchAction(keyword: string) {
       extern: {},
     },
   };
+}
+
+type ExampleChapter = {
+  id: string;
+  requestId: string;
+  logicalKey: string;
+  storageChapterId: string;
+  name: string;
+  order: number;
+  extern: Record<string, unknown>;
+};
+
+function buildExampleChapters(comicId: string): ExampleChapter[] {
+  void comicId;
+  return [
+    {
+      id: "ep-1",
+      requestId: "ep-1",
+      logicalKey: "ep-1",
+      storageChapterId: "ep-1",
+      name: "第1话 占位章节",
+      order: 1,
+      extern: {
+        rawOrder: 1,
+      },
+    },
+  ];
+}
+
+function resolveChapterByRequestId(
+  chapters: ExampleChapter[],
+  inputRequestId: unknown,
+) {
+  const requestId = String(inputRequestId ?? "").trim();
+  if (!requestId) {
+    return chapters[0];
+  }
+
+  return chapters.find((item) => item.requestId === requestId) ?? chapters[0];
+}
+
+function createChapterPages(comicId: string, storageChapterId: string) {
+  return [
+    {
+      id: "p-1",
+      name: "1.jpg",
+      path: `comic/${comicId}/${storageChapterId}/1.jpg`,
+      url: NOT_FOUND_IMAGE_URL,
+      extern: {},
+    },
+    {
+      id: "p-2",
+      name: "2.jpg",
+      path: `comic/${comicId}/${storageChapterId}/2.jpg`,
+      url: NOT_FOUND_IMAGE_URL,
+      extern: {},
+    },
+  ];
 }
 
 async function getInfo() {
@@ -100,14 +163,7 @@ async function getComicDetail(payload: ComicDetailPayload = {}) {
     is_aids: false,
     price: "0",
     purchased: "1",
-    series: [
-      {
-        id: "ep-1",
-        name: "第1话 占位章节",
-        order: 1,
-        rawOrder: 1,
-      },
-    ],
+    series: buildExampleChapters(comicId),
   };
 
   const normal = {
@@ -158,11 +214,12 @@ async function getComicDetail(payload: ComicDetailPayload = {}) {
     },
     eps: normalizedInfo.series.map((item) => ({
       id: String(item.id),
+      requestId: String(item.requestId),
+      logicalKey: String(item.logicalKey),
+      storageChapterId: String(item.storageChapterId),
       name: String(item.name),
       order: Number(item.order),
-      extern: {
-        sort: Number(item.rawOrder),
-      },
+      extern: item.extern,
     })),
     recommend: [],
     totalViews: Number(normalizedInfo.total_views),
@@ -200,42 +257,52 @@ async function getComicDetail(payload: ComicDetailPayload = {}) {
   };
 }
 
+async function getChapter(payload: ChapterPayload = {}) {
+  const comicId = String(payload.comicId ?? "").trim();
+  if (!comicId) {
+    throw new Error("comicId 不能为空");
+  }
+
+  const chapters = buildExampleChapters(comicId);
+  const chapter = resolveChapterByRequestId(chapters, payload.chapterId);
+  const pages = createChapterPages(comicId, chapter.storageChapterId);
+
+  return {
+    source: PLUGIN_ID,
+    comicId,
+    extern: payload.extern ?? null,
+    scheme: {
+      version: "1.0.0",
+      type: "chapterContent",
+      source: PLUGIN_ID,
+    },
+    data: {
+      chapter: {
+        id: chapter.id,
+        requestId: chapter.requestId,
+        logicalKey: chapter.logicalKey,
+        storageChapterId: chapter.storageChapterId,
+        name: chapter.name,
+        order: chapter.order,
+        pages,
+        extern: chapter.extern,
+      },
+    },
+  };
+}
+
 async function getReadSnapshot(payload: ReadSnapshotPayload = {}) {
   const comicId = String(payload.comicId ?? "").trim();
   if (!comicId) {
     throw new Error("comicId 不能为空");
   }
-  const chapterId = String(payload.chapterId ?? "ep-1").trim() || "ep-1";
+  const chapters = buildExampleChapters(comicId);
+  const currentChapter = resolveChapterByRequestId(chapters, payload.chapterId);
 
   const detail = await getComicDetail({ comicId, extern: payload.extern });
   const normal = toStringMap(toStringMap(detail.data).normal);
   const comicInfo = toStringMap(normal.comicInfo);
-
-  const pages = [
-    {
-      id: "p-1",
-      name: "1.jpg",
-      path: `comic/${comicId}/${chapterId}/1.jpg`,
-      url: NOT_FOUND_IMAGE_URL,
-      extern: {},
-    },
-    {
-      id: "p-2",
-      name: "2.jpg",
-      path: `comic/${comicId}/${chapterId}/2.jpg`,
-      url: NOT_FOUND_IMAGE_URL,
-      extern: {},
-    },
-  ];
-
-  const chapters = [
-    {
-      id: chapterId,
-      name: "第 1 话（占位）",
-      order: 1,
-      extern: {},
-    },
-  ];
+  const pages = createChapterPages(comicId, currentChapter.storageChapterId);
 
   return {
     source: PLUGIN_ID,
@@ -267,13 +334,24 @@ async function getReadSnapshot(payload: ReadSnapshotPayload = {}) {
         extern: toStringMap(comicInfo.extern),
       },
       chapter: {
-        id: chapterId,
-        name: "第 1 话（占位）",
-        order: 1,
+        id: currentChapter.id,
+        requestId: currentChapter.requestId,
+        logicalKey: currentChapter.logicalKey,
+        storageChapterId: currentChapter.storageChapterId,
+        name: currentChapter.name,
+        order: currentChapter.order,
         pages,
-        extern: {},
+        extern: currentChapter.extern,
       },
-      chapters,
+      chapters: chapters.map((item) => ({
+        id: item.id,
+        requestId: item.requestId,
+        logicalKey: item.logicalKey,
+        storageChapterId: item.storageChapterId,
+        name: item.name,
+        order: item.order,
+        extern: item.extern,
+      })),
     },
   };
 }
@@ -321,6 +399,7 @@ export default {
   getInfo,
   searchComic,
   getComicDetail,
+  getChapter,
   getReadSnapshot,
   fetchImageBytes,
   getSettingsBundle,
