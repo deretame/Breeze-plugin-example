@@ -243,6 +243,7 @@ function createCompiler() {
       rootDir: __dirname,
       outPath: outDir,
       outFileName: basename(outFile),
+      mode: "development",
     }),
   );
 }

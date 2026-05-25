@@ -140,6 +140,7 @@ async function searchComic(payload: SearchPayload = {}) {
 }
 
 async function getComicDetail(payload: ComicDetailPayload = {}) {
+  // throw new Error("test");
   const comicId = String(payload.comicId ?? "").trim();
   if (!comicId) {
     throw new Error("comicId 不能为空");
