@@ -1,6 +1,7 @@
 import { PLUGIN_ID } from "./common";
+import type { PluginInfo } from "../types/type";
 
-export function buildPluginInfo() {
+export function buildPluginInfo(): PluginInfo {
   return {
     name: "Example Plugin",
     uuid: PLUGIN_ID,
@@ -13,6 +14,7 @@ export function buildPluginInfo() {
     version: "0.1.0",
     home: "https://example.com",
     updateUrl: "https://httpstat.us/404",
+    npmName: "breeze-plugin-example",
     function: [
       {
         id: "search",
@@ -34,6 +36,6 @@ export function buildPluginInfo() {
   };
 }
 
-export function buildManifestInfo() {
+export function buildManifestInfo(): PluginInfo {
   return buildPluginInfo();
 }

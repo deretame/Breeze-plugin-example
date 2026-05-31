@@ -2,7 +2,16 @@ export const PLUGIN_ID = "00000000-0000-0000-0000-00000000e001";
 export const NOT_FOUND_IMAGE_URL = "";
 export const PLACEHOLDER_IMAGE_PATH = "placeholder/image-404.png";
 
-export function toStringMap(value: unknown): Record<string, unknown> {
+import type {
+  ActionItem,
+  ComicListItem,
+  ImageItem,
+  MetadataListItem,
+  PagingInfo,
+  StringMap,
+} from "../types/type";
+
+export function toStringMap(value: unknown): StringMap {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return {};
   }
@@ -11,9 +20,11 @@ export function toStringMap(value: unknown): Record<string, unknown> {
 
 export function createActionItem(
   name: unknown,
-  onTap: Record<string, unknown> = {},
-  extern: Record<string, unknown> = {},
-) {
+  onTap: StringMap = {},
+  extern: StringMap = {},
+): ActionItem {
+  // Keep all action payloads normalized so downstream schema consumers do not
+  // have to special-case missing fields.
   return {
     name: String(name ?? ""),
     onTap,
@@ -23,13 +34,13 @@ export function createActionItem(
 
 export function createImage(
   input: {
-    id?: unknown;
-    url?: unknown;
-    name?: unknown;
-    path?: unknown;
-    extern?: Record<string, unknown>;
+    id?: string;
+    url?: string;
+    name?: string;
+    path?: string;
+    extern?: StringMap;
   } = {},
-) {
+): ImageItem {
   return {
     id: String(input.id ?? ""),
     url: String(input.url ?? "").trim() || NOT_FOUND_IMAGE_URL,
@@ -43,8 +54,8 @@ export function createMetadataActionList(
   type: string,
   name: string,
   values: unknown,
-  mapItem?: (value: string) => ReturnType<typeof createActionItem>,
-) {
+  mapItem?: (value: string) => ActionItem,
+): MetadataListItem {
   const list = Array.isArray(values) ? values : values == null ? [] : [values];
   const normalized = list
     .map((item) => String(item ?? "").trim())
@@ -62,16 +73,19 @@ export function createBasicMetadata(
   type: string,
   name: string,
   values: unknown,
-) {
+): MetadataListItem {
   const list = Array.isArray(values) ? values : values == null ? [] : [values];
   return {
     type,
     name,
-    value: list.map((item) => String(item ?? "").trim()).filter(Boolean),
+    value: list
+      .map((item) => String(item ?? "").trim())
+      .filter(Boolean)
+      .map((item) => createActionItem(item)),
   };
 }
 
-export function createComicItem(id: string, title: string) {
+export function createComicItem(id: string, title: string): ComicListItem {
   const path = `comic/${id}/cover.png`;
   return {
     source: PLUGIN_ID,
@@ -121,10 +135,10 @@ export function createComicItem(id: string, title: string) {
       related_list: [],
     },
     extern: {},
-  };
+  } satisfies ComicListItem;
 }
 
-export function createPaging(page = 1, total = 1) {
+export function createPaging(page = 1, total = 1): PagingInfo {
   return {
     page,
     pages: Math.max(1, total),
@@ -132,63 +146,3 @@ export function createPaging(page = 1, total = 1) {
     hasReachedMax: true,
   };
 }
-
-type FieldKind =
-  | "text"
-  | "password"
-  | "switch"
-  | "select"
-  | "choice"
-  | "multiChoice";
-
-type BaseField = {
-  key: string;
-  kind: FieldKind;
-  label: string;
-  fnPath?: string;
-  persist?: boolean;
-};
-
-type OptionField = BaseField & {
-  kind: "select" | "choice" | "multiChoice";
-  options?: Array<{ label: string; value: unknown }>;
-};
-
-type PlainField = BaseField & {
-  kind: "text" | "password" | "switch";
-};
-
-type SettingsField = OptionField | PlainField;
-
-export type SettingsBundleContract = {
-  source: string;
-  scheme: {
-    version: "1.0.0";
-    type: "settings";
-    sections: Array<{
-      id: string;
-      title: string;
-      fields: SettingsField[];
-    }>;
-  };
-  data: {
-    canShowUserInfo: boolean;
-    values: Record<string, unknown>;
-  };
-};
-
-type CapabilityAction = {
-  key?: string;
-  title: string;
-  fnPath: string;
-};
-
-export type CapabilitiesBundleContract = {
-  source: string;
-  scheme: {
-    version: "1.0.0";
-    type: "capabilities";
-    actions: CapabilityAction[];
-  };
-  data: Record<string, unknown>;
-};

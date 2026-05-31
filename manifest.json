@@ -10,6 +10,7 @@
   "version": "0.1.0",
   "home": "https://example.com",
   "updateUrl": "https://httpstat.us/404",
+  "npmName": "breeze-plugin-example",
   "function": [
     {
       "id": "search",

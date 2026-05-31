@@ -1,47 +1,45 @@
 import {
   NOT_FOUND_IMAGE_URL,
   PLUGIN_ID,
-  SettingsBundleContract,
   createActionItem,
   createComicItem,
   createImage,
   createMetadataActionList,
-  createPaging,
   toStringMap,
 } from "./common";
 import { buildPluginInfo } from "./get-info";
+import type {
+  ActionItem,
+  ChapterContentContract,
+  ChapterPage,
+  ChapterPayload,
+  ComicDetailContract,
+  ComicDetailNormal,
+  ComicDetailPayload,
+  FetchImageBytesPayload,
+  FunctionPageContract,
+  GetFunctionPagePayload,
+  MetadataListItem,
+  ReadSnapshotContract,
+  ReadSnapshotPayload,
+  SearchAction,
+  SearchComicPayload,
+  SearchResultContract,
+  SettingsBundleContract,
+  StringMap,
+} from "../types/type";
 
-type BasePayload = {
-  extern?: Record<string, unknown>;
+export type ExampleChapter = {
+  id: string;
+  requestId: string;
+  logicalKey: string;
+  storageChapterId: string;
+  name: string;
+  order: number;
+  extern: StringMap;
 };
 
-type SearchPayload = BasePayload & {
-  keyword?: string;
-  page?: number;
-};
-
-type ComicDetailPayload = BasePayload & {
-  comicId?: string;
-};
-
-type ChapterPayload = BasePayload & {
-  comicId?: string;
-  chapterId?: string;
-};
-
-type ReadSnapshotPayload = BasePayload & {
-  comicId?: string;
-  chapterId?: string;
-};
-
-type FetchImagePayload = BasePayload & {
-  url?: string;
-  timeoutMs?: number;
-  taskGroupKey?: string;
-  extern?: Record<string, unknown>;
-};
-
-function openSearchAction(keyword: string) {
+function openSearchAction(keyword: string): SearchAction {
   return {
     type: "openSearch",
     payload: {
@@ -51,16 +49,6 @@ function openSearchAction(keyword: string) {
     },
   };
 }
-
-type ExampleChapter = {
-  id: string;
-  requestId: string;
-  logicalKey: string;
-  storageChapterId: string;
-  name: string;
-  order: number;
-  extern: Record<string, unknown>;
-};
 
 function buildExampleChapters(comicId: string): ExampleChapter[] {
   void comicId;
@@ -82,7 +70,7 @@ function buildExampleChapters(comicId: string): ExampleChapter[] {
 function resolveChapterByRequestId(
   chapters: ExampleChapter[],
   inputRequestId: unknown,
-) {
+): ExampleChapter {
   const requestId = String(inputRequestId ?? "").trim();
   if (!requestId) {
     return chapters[0];
@@ -91,7 +79,10 @@ function resolveChapterByRequestId(
   return chapters.find((item) => item.requestId === requestId) ?? chapters[0];
 }
 
-function createChapterPages(comicId: string, storageChapterId: string) {
+function createChapterPages(
+  comicId: string,
+  storageChapterId: string,
+): ChapterPage[] {
   return [
     {
       id: "p-1",
@@ -110,16 +101,24 @@ function createChapterPages(comicId: string, storageChapterId: string) {
   ];
 }
 
-async function getInfo() {
+async function getInfo(): Promise<ReturnType<typeof buildPluginInfo>> {
   return buildPluginInfo();
 }
 
-async function searchComic(payload: SearchPayload = {}) {
+async function searchComic(
+  payload: SearchComicPayload = {},
+): Promise<SearchResultContract> {
   const extern = toStringMap(payload.extern);
   const page = Math.max(1, Number(payload.page ?? 1) || 1);
   const keyword =
     String(payload.keyword ?? extern.keyword ?? "").trim() || "example";
   const item = createComicItem("10001", `示例漫画：${keyword}`);
+  const paging = {
+    page,
+    pages: 1,
+    total: 1,
+    hasReachedMax: true,
+  };
 
   return {
     source: PLUGIN_ID,
@@ -131,16 +130,17 @@ async function searchComic(payload: SearchPayload = {}) {
       list: "comicGrid",
     },
     data: {
-      paging: createPaging(page, 1),
+      paging,
       items: [item],
     },
-    paging: createPaging(page, 1),
+    paging,
     items: [item],
   };
 }
 
-async function getComicDetail(payload: ComicDetailPayload = {}) {
-  // throw new Error("test");
+async function getComicDetail(
+  payload: ComicDetailPayload = {},
+): Promise<ComicDetailContract> {
   const comicId = String(payload.comicId ?? "").trim();
   if (!comicId) {
     throw new Error("comicId 不能为空");
@@ -167,7 +167,7 @@ async function getComicDetail(payload: ComicDetailPayload = {}) {
     series: buildExampleChapters(comicId),
   };
 
-  const normal = {
+  const normal: ComicDetailNormal = {
     comicInfo: {
       id: String(normalizedInfo.id),
       title: normalizedInfo.name,
@@ -235,13 +235,17 @@ async function getComicDetail(payload: ComicDetailPayload = {}) {
     extern: {},
   };
 
-  const scheme = {
+  const scheme: {
+    version: "1.0.0";
+    type: "comicDetail";
+    source: string;
+  } = {
     version: "1.0.0",
     type: "comicDetail",
     source: PLUGIN_ID,
   };
 
-  const data = {
+  const data: ComicDetailContract["data"] = {
     normal,
     raw: {
       comicInfo: normalizedInfo,
@@ -258,7 +262,9 @@ async function getComicDetail(payload: ComicDetailPayload = {}) {
   };
 }
 
-async function getChapter(payload: ChapterPayload = {}) {
+async function getChapter(
+  payload: ChapterPayload = {},
+): Promise<ChapterContentContract> {
   const comicId = String(payload.comicId ?? "").trim();
   if (!comicId) {
     throw new Error("comicId 不能为空");
@@ -271,6 +277,7 @@ async function getChapter(payload: ChapterPayload = {}) {
   return {
     source: PLUGIN_ID,
     comicId,
+    chapterId: chapter.id,
     extern: payload.extern ?? null,
     scheme: {
       version: "1.0.0",
@@ -278,6 +285,12 @@ async function getChapter(payload: ChapterPayload = {}) {
       source: PLUGIN_ID,
     },
     data: {
+      comic: {
+        id: comicId,
+        source: PLUGIN_ID,
+        title: chapter.name,
+        extern: chapter.extern,
+      },
       chapter: {
         id: chapter.id,
         requestId: chapter.requestId,
@@ -288,11 +301,22 @@ async function getChapter(payload: ChapterPayload = {}) {
         pages,
         extern: chapter.extern,
       },
+      chapters: chapters.map((item) => ({
+        id: item.id,
+        requestId: item.requestId,
+        logicalKey: item.logicalKey,
+        storageChapterId: item.storageChapterId,
+        name: item.name,
+        order: item.order,
+        extern: item.extern,
+      })),
     },
   };
 }
 
-async function getReadSnapshot(payload: ReadSnapshotPayload = {}) {
+async function getReadSnapshot(
+  payload: ReadSnapshotPayload = {},
+): Promise<ReadSnapshotContract> {
   const comicId = String(payload.comicId ?? "").trim();
   if (!comicId) {
     throw new Error("comicId 不能为空");
@@ -313,25 +337,6 @@ async function getReadSnapshot(payload: ReadSnapshotPayload = {}) {
         id: String(comicInfo.id ?? comicId),
         source: PLUGIN_ID,
         title: String(comicInfo.title ?? ""),
-        description: String(comicInfo.description ?? ""),
-        cover: {
-          ...toStringMap(comicInfo.cover),
-          extern: toStringMap(toStringMap(comicInfo.cover).extern),
-        },
-        creator: {
-          ...toStringMap(comicInfo.creator),
-          avatar: {
-            ...toStringMap(toStringMap(comicInfo.creator).avatar),
-            extern: toStringMap(
-              toStringMap(toStringMap(comicInfo.creator).avatar).extern,
-            ),
-          },
-          extern: toStringMap(toStringMap(comicInfo.creator).extern),
-        },
-        titleMeta: Array.isArray(comicInfo.titleMeta)
-          ? comicInfo.titleMeta
-          : [],
-        metadata: Array.isArray(comicInfo.metadata) ? comicInfo.metadata : [],
         extern: toStringMap(comicInfo.extern),
       },
       chapter: {
@@ -360,7 +365,7 @@ async function getReadSnapshot(payload: ReadSnapshotPayload = {}) {
 async function fetchImageBytes({
   url = "",
   timeoutMs = 30000,
-}: FetchImagePayload = {}) {
+}: FetchImageBytesPayload = {}): Promise<Uint8Array> {
   const targetUrl = String(url).trim();
   if (!targetUrl) {
     throw new Error("url 不能为空");
@@ -396,6 +401,12 @@ async function getSettingsBundle(): Promise<SettingsBundleContract> {
   };
 }
 
+async function getFunctionPage(
+  _payload: GetFunctionPagePayload = {},
+): Promise<FunctionPageContract> {
+  throw new Error("getFunctionPage 未实现");
+}
+
 export default {
   getInfo,
   searchComic,
@@ -404,4 +415,5 @@ export default {
   getReadSnapshot,
   fetchImageBytes,
   getSettingsBundle,
+  getFunctionPage,
 };
