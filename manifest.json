@@ -6,30 +6,67 @@
     "name": "example",
     "describe": "占位作者信息"
   },
-  "describe": "Breeze 插件示例工程（占位实现）",
+  "describe": "Breeze 插件示例工程（含全部类型示例）",
   "version": "0.1.0",
   "home": "https://example.com",
   "updateUrl": "https://httpstat.us/404",
   "npmName": "breeze-plugin-example",
   "function": [
     {
-      "id": "search",
-      "title": "搜索",
+      "id": "ranking",
+      "title": "排行榜",
       "action": {
-        "type": "openSearch",
+        "type": "openComicList",
         "payload": {
-          "source": "00000000-0000-0000-0000-00000000e001",
-          "keyword": "example"
+          "scene": {
+            "title": "示例排行榜",
+            "source": "00000000-0000-0000-0000-00000000e001",
+            "body": {
+              "type": "pluginPagedComicList",
+              "request": {
+                "fnPath": "getRankingData",
+                "core": {},
+                "extern": {
+                  "source": "ranking"
+                }
+              }
+            },
+            "filter": {
+              "fnPath": "getRankingFilterBundle",
+              "extern": {
+                "source": "ranking"
+              }
+            }
+          }
         }
       }
     },
     {
-      "id": "detail",
-      "title": "详情",
+      "id": "favorite",
+      "title": "云端收藏",
       "action": {
-        "type": "openComicDetail",
+        "type": "openComicList",
         "payload": {
-          "comicId": "10001"
+          "scene": {
+            "title": "云端收藏",
+            "source": "00000000-0000-0000-0000-00000000e001",
+            "body": {
+              "type": "pluginPagedComicList",
+              "request": {
+                "fnPath": "getRankingData",
+                "core": {},
+                "extern": {
+                  "source": "favorite"
+                }
+              }
+            },
+            "filter": {
+              "fnPath": "getRankingFilterBundle",
+              "extern": {
+                "source": "favorite"
+              }
+            }
+          }
         }
       }
     }
