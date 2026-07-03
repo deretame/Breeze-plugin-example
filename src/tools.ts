@@ -29,37 +29,38 @@ export const cache = {
 export const pluginConfig = {
   /**
    * 持久化配置存储：保存配置。
-   * * value 需要是 JSON 字符串，Dart 端会 `jsonDecode` 后存入 ObjectBox。
+   * * Dart 端会对 value 尝试 `jsonDecode`，
+   * 成功后以解码后的值存入 ObjectBox（失败则存原字符串）。
    *
    * @example
    * ```ts
-   * await pluginConfig.save("site", "\"EH\"");
-   * await pluginConfig.save("opts", JSON.stringify({ a: 1 }));
+   * // 存简单字符串 — JSON 可解析，存为字符串值
+   * await pluginConfig.save("site", "EH");
+   *
+   * // 存 JSON 对象 — jsonDecode 后存为 Map
+   * await pluginConfig.save("opts", '{"a":1}');
    * ```
    * @param key 配置键名
-   * @param value 要保存的 JSON 字符串
+   * @param value 要保存的值（可以是 JSON 字符串）
    */
-  save: <T = unknown>(key: string, value: string): Promise<T> =>
-    bridge.call("save_plugin_config", key, value) as Promise<T>,
+  save: (key: string, value: string) =>
+    bridge.call("save_plugin_config", key, value) as Promise<string>,
 
   /**
    * 持久化配置存储：读取配置。
-   * * 直接返回 `{ ok: boolean, value: unknown }` 对象。
-   * * 当 `ok === true` 时，可取 `value` 作为存储值。
-   * * 当 `ok === false` 或读取失败时，可视为 key 不存在。
+   * * 返回 `'{"ok":true,"value":...}'` 格式的 JSON 字符串。
+   * 需要 `JSON.parse` 一层拿到 `{ ok, value }`，再取 `.value`。
    *
    * @example
    * ```ts
-   * const raw = await pluginConfig.load<Record<string, unknown>>("site", "\"EH\"");
-   * if (raw.ok === true) {
-   *   console.log(raw.value); // "EH"
-   * }
+   * const raw = await pluginConfig.load("site", "EH");
+   * const { value } = JSON.parse(raw);  // "EH"
    * ```
    * @param key 配置键名
-   * @param fallback 找不到键时的默认返回值（JSON 字符串），默认为 ""
+   * @param fallback 找不到键时的默认返回值，默认为 ""
    */
-  load: <T = unknown>(key: string, fallback = ""): Promise<T> =>
-    bridge.call("load_plugin_config", key, fallback) as Promise<T>,
+  load: (key: string, fallback = "") =>
+    bridge.call("load_plugin_config", key, fallback) as Promise<string>,
 };
 
 export const runtime = {
