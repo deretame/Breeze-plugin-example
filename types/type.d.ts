@@ -241,7 +241,6 @@ export type PluginFunctionItem = {
   title: string;
   action:
     | { type: "openSearch"; payload: { source: string; keyword?: string } }
-    | { type: "openComicDetail"; payload: { comicId: string } }
     | { type: "openWeb"; payload: { title?: string; url: string } }
     | {
         type: "openComicList";
@@ -250,7 +249,7 @@ export type PluginFunctionItem = {
             title: string;
             source: string;
             body: {
-              type: "pluginPagedComicList" | "pluginPagedCreatorList";
+              type: "pluginPagedComicList";
               request: ComicListRequest;
             };
             filter?: ComicListRequest;
