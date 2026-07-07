@@ -1,5 +1,5 @@
-import { getApi, requireApi, requireCryptoLike } from "./runtime-api";
-import type { Buffer } from "./types/buffer";
+import { getApi, requireApi, requireCryptoLike } from "./runtime-api.js";
+import type { Buffer } from "./types/buffer.js";
 
 function expectType<T>(_value: T): void {}
 

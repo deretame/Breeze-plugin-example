@@ -5,7 +5,7 @@
  * 并通过 `js/99_exports.js` 挂载到 `globalThis.crypto`。
  */
 
-import type { Buffer } from "./buffer";
+import type { Buffer } from "./buffer.js";
 
 /** 可被作为二进制输入的数据类型。 */
 export type BinaryInput = Uint8Array | ArrayBuffer | ArrayBufferView | number[];

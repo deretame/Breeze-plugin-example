@@ -7,11 +7,11 @@
 
 /// <reference path="./breeze-html.d.ts" />
 
-import type { Base64Api } from "./base64";
-import type { BridgeApi } from "./bridge";
-import type { CryptoApi } from "./crypto";
-import type { FsApi, PathApi } from "./fs";
-import type { NativeApi } from "./native";
+import type { Base64Api } from "./base64.js";
+import type { BridgeApi } from "./bridge.js";
+import type { CryptoApi } from "./crypto.js";
+import type { FsApi, PathApi } from "./fs.js";
+import type { NativeApi } from "./native.js";
 
 export interface FSErrorConstructor {
   new (message?: string, code?: string, path?: string): Error;

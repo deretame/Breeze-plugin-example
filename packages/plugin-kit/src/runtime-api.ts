@@ -1,4 +1,4 @@
-import type { CryptoApi, RuntimeApiSet } from "./types";
+import type { CryptoApi, RuntimeApiSet } from "./types/index.js";
 
 export interface RuntimeFacade extends RuntimeApiSet {
   mathAdd(a: number, b: number): Promise<number>;

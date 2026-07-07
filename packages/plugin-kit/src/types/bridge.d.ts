@@ -4,7 +4,7 @@
  * `bridge` 是 JS 与宿主 Rust 之间的调用通道，支持异步 `call` 与同步 `callSync`。
  */
 
-import type { BinaryInput } from "./crypto";
+import type { BinaryInput } from "./crypto.js";
 
 export interface BridgeApi {
   /** gzip 压缩（bridge 层快捷方法）。 */

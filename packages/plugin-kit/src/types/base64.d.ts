@@ -5,7 +5,7 @@
  * `bytesFromBase64` 全局函数，以及 `__web.base64` 模块。
  */
 
-import type { BinaryInput } from "./crypto";
+import type { BinaryInput } from "./crypto.js";
 
 /** Base64 编解码 API。 */
 export interface Base64Api {
