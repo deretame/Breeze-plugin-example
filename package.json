@@ -13,11 +13,14 @@
     "dev:serve": "tsx dev-server.ts"
   },
   "devDependencies": {
-    "@rspack/cli": "^2.1.1",
-    "@rspack/core": "^2.1.1",
-    "@types/node": "^26.0.1",
+    "@rspack/cli": "^2.1.2",
+    "@rspack/core": "^2.1.2",
+    "@types/node": "^26.1.0",
     "cross-env": "^10.1.0",
-    "tsx": "^4.22.4",
+    "tsx": "^4.23.0",
     "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "breeze-plugin-kit": "^0.2.0"
   }
 }

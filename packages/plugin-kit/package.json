@@ -1,6 +1,6 @@
 {
-  "name": "@breeze/plugin-kit",
-  "version": "0.1.0",
+  "name": "breeze-plugin-kit",
+  "version": "0.2.0",
   "description": "Breeze 插件开发工具包：运行时 API 类型声明与常用工具函数",
   "type": "module",
   "packageManager": "pnpm@11.5.0",
@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "tsc -p tsconfig.build.json && node -e \"require('fs').cpSync('src/types', 'dist/types', {recursive:true, force:true})\""
+    "build": "tsx build.ts"
   },
   "devDependencies": {
     "@types/node": "^26.0.1",

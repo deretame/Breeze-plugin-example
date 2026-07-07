@@ -31,13 +31,12 @@ import type {
   SearchResultContract,
   SettingChangedPayload,
   SettingsBundleContract,
-  StringMap,
   ToggleFavoritePayload,
   ToggleFavoriteResult,
   ToggleLikePayload,
   ToggleLikeResult,
   UserInfoBundleContract,
-} from "../types/type";
+} from "breeze-plugin-kit";
 import {
   NOT_FOUND_IMAGE_URL,
   PLUGIN_ID,
@@ -856,7 +855,11 @@ async function onAuthChanged(
 
 /** 示例：记住密码开关变更回调 */
 async function onRememberChanged(
-  payload: SettingChangedPayload<boolean> = { extern: {}, key: "", value: false },
+  payload: SettingChangedPayload<boolean> = {
+    extern: {},
+    key: "",
+    value: false,
+  },
 ): Promise<Record<string, unknown>> {
   console.log("[onRememberChanged]", payload);
   if (payload.value) {
@@ -885,7 +888,11 @@ async function onQualityChanged(
 
 /** 示例：成人内容开关变更回调 */
 async function onAdultChanged(
-  payload: SettingChangedPayload<boolean> = { extern: {}, key: "", value: false },
+  payload: SettingChangedPayload<boolean> = {
+    extern: {},
+    key: "",
+    value: false,
+  },
 ): Promise<Record<string, unknown>> {
   console.log("[onAdultChanged]", payload);
   void payload;

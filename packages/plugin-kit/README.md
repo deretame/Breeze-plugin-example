@@ -1,11 +1,11 @@
-# @breeze/plugin-kit
+# breeze-plugin-kit
 
 Breeze 插件开发工具包，提供运行时 API 类型声明与常用工具函数。
 
 ## 安装
 
 ```bash
-pnpm add @breeze/plugin-kit
+pnpm add breeze-plugin-kit
 ```
 
 ## 内容
@@ -22,8 +22,8 @@ pnpm add @breeze/plugin-kit
 ## 使用示例
 
 ```ts
-import type { InfoContract } from "@breeze/plugin-kit";
-import { cache, pluginConfig } from "@breeze/plugin-kit";
+import type { InfoContract } from "breeze-plugin-kit";
+import { cache, pluginConfig } from "breeze-plugin-kit";
 
 async function init() {
   await cache.set("key", { value: 1 });

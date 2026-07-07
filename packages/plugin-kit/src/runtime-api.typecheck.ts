@@ -1,4 +1,5 @@
 import { getApi, requireApi, requireCryptoLike } from "./runtime-api";
+import type { Buffer } from "./types/buffer";
 
 function expectType<T>(_value: T): void {}
 

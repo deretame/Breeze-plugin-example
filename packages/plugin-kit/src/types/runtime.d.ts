@@ -57,9 +57,9 @@ declare global {
   var bridge: BridgeApi;
 
   /** 运行时注入的 crypto 模块。 */
-  var crypto: CryptoApi;
+  var hostCrypto: CryptoApi;
 
-  /** @deprecated use {@link crypto} */
+  /** @deprecated use {@link hostCrypto} */
   var nodeCryptoCompat: CryptoApi | undefined;
 
   /** UUID v4 生成器。 */

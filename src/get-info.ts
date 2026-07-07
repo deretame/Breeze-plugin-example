@@ -1,5 +1,5 @@
+import type { InfoContract } from "breeze-plugin-kit";
 import { PLUGIN_ID } from "./common";
-import type { InfoContract } from "../types/type";
 
 export function buildPluginInfo(): InfoContract {
   return {
