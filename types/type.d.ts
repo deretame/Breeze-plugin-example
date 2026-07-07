@@ -678,6 +678,25 @@ export type CapabilityAction = {
   fnPath: string;
 };
 
+export type SettingChangedPayload<T = unknown> = {
+  extern: StringMap;
+  key: string;
+  value: T;
+};
+
+/** 单值设置项变更回调载荷 */
+export type SingleSettingChangedPayload<T = unknown> = SettingChangedPayload<T>;
+
+/** 多选/多值设置项变更回调载荷（value 为数组） */
+export type MultiSettingChangedPayload<T = unknown> = SettingChangedPayload<
+  T[]
+>;
+
+/** 设置项变更回调函数签名 */
+export type SettingChangedCallback<T = unknown> = (
+  payload: SettingChangedPayload<T>,
+) => Promise<Record<string, unknown>>;
+
 export type CapabilitiesBundleContract = {
   source: string;
   scheme: {

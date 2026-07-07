@@ -1,22 +1,10 @@
-import {
-  NOT_FOUND_IMAGE_URL,
-  PLUGIN_ID,
-  createActionItem,
-  createComicItem,
-  createImage,
-  createMetadataActionList,
-  toStringMap,
-} from "./common";
-import { buildPluginInfo } from "./get-info";
 import type {
-  ActionItem,
   AdvancedSearchContract,
   CapabilitiesBundleContract,
   ChapterContentContract,
   ChapterPage,
   ChapterPayload,
   ChapterSummary,
-  ChapterWithPages,
   ComicDetailContract,
   ComicDetailNormal,
   ComicDetailPayload,
@@ -27,22 +15,21 @@ import type {
   CommentItem,
   CommentMutationContract,
   CommentPostPayload,
-  CommentReplyPayload,
   CommentRepliesContract,
   CommentRepliesPayload,
+  CommentReplyPayload,
   FetchImageBytesPayload,
   FilterBundleContract,
-  FilterOption,
   FunctionPageContract,
   GetFunctionPagePayload,
   InfoContract,
   ListFavoriteFoldersResult,
-  MetadataListItem,
   MoveFavoriteToFolderPayload,
   ReadSnapshotContract,
   ReadSnapshotPayload,
   SearchComicPayload,
   SearchResultContract,
+  SettingChangedPayload,
   SettingsBundleContract,
   StringMap,
   ToggleFavoritePayload,
@@ -51,6 +38,16 @@ import type {
   ToggleLikeResult,
   UserInfoBundleContract,
 } from "../types/type";
+import {
+  NOT_FOUND_IMAGE_URL,
+  PLUGIN_ID,
+  createActionItem,
+  createComicItem,
+  createImage,
+  createMetadataActionList,
+  toStringMap,
+} from "./common";
+import { buildPluginInfo } from "./get-info";
 
 // ---------------------------------------------------------------------------
 // helpers
@@ -850,7 +847,7 @@ async function getFunctionPage(
 
 /** 示例：用户名/密码变更回调——建议在两次变更完后统一校验并登录 */
 async function onAuthChanged(
-  payload: { key?: string; value?: unknown; allValues?: StringMap } = {},
+  payload: SettingChangedPayload<string> = { extern: {}, key: "", value: "" },
 ): Promise<Record<string, unknown>> {
   console.log("[onAuthChanged]", payload);
   void payload;
@@ -859,19 +856,18 @@ async function onAuthChanged(
 
 /** 示例：记住密码开关变更回调 */
 async function onRememberChanged(
-  payload: { key?: string; value?: unknown; allValues?: StringMap } = {},
+  payload: SettingChangedPayload<boolean> = { extern: {}, key: "", value: false },
 ): Promise<Record<string, unknown>> {
   console.log("[onRememberChanged]", payload);
   if (payload.value) {
     // 用户打开了"记住密码"，持久化凭据
-    void payload.allValues;
   }
   return {};
 }
 
 /** 示例：主题变更回调 */
 async function onThemeChanged(
-  payload: { key?: string; value?: unknown; allValues?: StringMap } = {},
+  payload: SettingChangedPayload<string> = { extern: {}, key: "", value: "" },
 ): Promise<Record<string, unknown>> {
   console.log("[onThemeChanged]", payload);
   void payload;
@@ -880,7 +876,7 @@ async function onThemeChanged(
 
 /** 示例：画质变更回调 */
 async function onQualityChanged(
-  payload: { key?: string; value?: unknown; allValues?: StringMap } = {},
+  payload: SettingChangedPayload<string> = { extern: {}, key: "", value: "" },
 ): Promise<Record<string, unknown>> {
   console.log("[onQualityChanged]", payload);
   void payload;
@@ -889,7 +885,7 @@ async function onQualityChanged(
 
 /** 示例：成人内容开关变更回调 */
 async function onAdultChanged(
-  payload: { key?: string; value?: unknown; allValues?: StringMap } = {},
+  payload: SettingChangedPayload<boolean> = { extern: {}, key: "", value: false },
 ): Promise<Record<string, unknown>> {
   console.log("[onAdultChanged]", payload);
   void payload;
@@ -898,7 +894,11 @@ async function onAdultChanged(
 
 /** 示例：屏蔽标签多选变更回调 */
 async function onHiddenTagsChanged(
-  payload: { key?: string; value?: unknown; allValues?: StringMap } = {},
+  payload: SettingChangedPayload<string[]> = {
+    extern: {},
+    key: "content.hiddenTags",
+    value: [],
+  },
 ): Promise<Record<string, unknown>> {
   console.log("[onHiddenTagsChanged]", payload);
   void payload;
