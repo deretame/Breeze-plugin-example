@@ -38,6 +38,13 @@ import type {
   UserInfoBundleContract,
 } from "breeze-plugin-kit";
 import {
+  cache,
+  flutterTools,
+  opencc,
+  pluginConfig,
+  runtime,
+} from "breeze-plugin-kit";
+import {
   NOT_FOUND_IMAGE_URL,
   PLUGIN_ID,
   createActionItem,
@@ -104,6 +111,30 @@ function createChapterPages(
 // getInfo — 插件注册信息
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// init — 插件初始化（可选）
+// ---------------------------------------------------------------------------
+
+/** 插件初始化 — 每次加载/热更新后调用一次 */
+async function init(): Promise<{ source: string; data: { ok: boolean } }> {
+  console.log("[init] 插件初始化");
+
+  // 示例：从持久化配置中读取上次保存的登录账号
+  const raw = await pluginConfig.load("auth.account", "");
+  try {
+    const { value } = JSON.parse(raw);
+    console.log("[init] 上次登录账号:", value);
+  } catch {
+    // 没有保存过或解析失败，忽略
+  }
+
+  return { source: PLUGIN_ID, data: { ok: true } };
+}
+
+// ---------------------------------------------------------------------------
+// getInfo — 插件注册信息
+// ---------------------------------------------------------------------------
+
 /** 插件注册信息 — Flask 宿主发现插件时调用 */
 async function getInfo(): Promise<InfoContract> {
   return buildPluginInfo() as InfoContract;
@@ -120,12 +151,24 @@ async function searchComic(
   console.log("[searchComic]", payload);
   const extern = toStringMap(payload.extern);
   const page = Math.max(1, Number(payload.page ?? 1) || 1);
-  const keyword =
+  let keyword =
     String(payload.keyword ?? extern.keyword ?? "").trim() || "example";
+
+  // 示例：使用 opencc 把繁体关键字转成简体再搜索（若目标站是简体）
+  keyword = await opencc.convert(keyword, "t2s.json");
+
+  // 示例：使用 cache 做进程内搜索缓存
+  const cacheKey = `search:${keyword}:${page}`;
+  const cached = await cache.get<SearchResultContract | null>(cacheKey, null);
+  if (cached) {
+    console.log("[searchComic] 命中缓存");
+    return cached;
+  }
+
   const item = createComicItem("10001", `示例漫画：${keyword}`);
   const paging = { page, pages: 1, total: 1, hasReachedMax: true };
 
-  return {
+  const result: SearchResultContract = {
     source: PLUGIN_ID,
     extern: payload.extern ?? null,
     scheme: {
@@ -138,6 +181,9 @@ async function searchComic(
     paging,
     items: [item],
   };
+
+  await cache.set(cacheKey, result);
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -151,6 +197,11 @@ async function getComicDetail(
   console.log("[getComicDetail]", payload);
   const comicId = String(payload.comicId ?? "").trim();
   if (!comicId) throw new Error("comicId 不能为空");
+
+  // 示例：读取插件设置，根据“允许成人内容”开关过滤标签
+  const adultRaw = await pluginConfig.load("content.adult", "false");
+  const isAdultAllowed = JSON.parse(adultRaw).value === true;
+  console.log("[getComicDetail] 允许成人内容:", isAdultAllowed);
 
   const normalizedInfo = {
     id: comicId,
@@ -365,8 +416,24 @@ async function fetchImageBytes({
   console.log("[fetchImageBytes]", { url, timeoutMs, taskGroupKey, extern });
   const targetUrl = String(url).trim();
   if (!targetUrl) throw new Error("url 不能为空");
-  void { timeoutMs, taskGroupKey, extern };
-  return new Uint8Array(new ArrayBuffer(0));
+
+  // 示例：检查下载任务是否已被取消
+  if (taskGroupKey && (await runtime.isTaskGroupCancelled(taskGroupKey))) {
+    console.log("[fetchImageBytes] 任务已取消，跳过下载");
+    return new Uint8Array(new ArrayBuffer(0));
+  }
+
+  // 示例：使用 fetch 下载图片，并加上二进制响应优化头
+  const res = await fetch(targetUrl, {
+    headers: { "x-rquickjs-host-offload-binary-v1": "1" },
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+
+  if (!res.ok) {
+    throw new Error(`下载失败: ${res.status} ${res.statusText}`);
+  }
+
+  return new Uint8Array(await res.arrayBuffer());
 }
 
 // ---------------------------------------------------------------------------
@@ -831,29 +898,47 @@ async function getUserInfoBundle(): Promise<UserInfoBundleContract> {
 // getFunctionPage — 插件自定义页面
 // ---------------------------------------------------------------------------
 
-/** 插件自定义页面（示例中只抛出错误，实际使用时按 FunctionPageContract 返回 body 节点） */
+/** 插件自定义页面 */
 async function getFunctionPage(
   _payload: GetFunctionPagePayload = {},
 ): Promise<FunctionPageContract> {
-  throw new Error(
-    "getFunctionPage 未实现——示例中不包含 FunctionPage，请使用 ComicListSceneBundleContract",
-  );
+  // 示例：返回一个带标题的空列表页面
+  return {
+    source: PLUGIN_ID,
+    scheme: {
+      version: "1.0.0" as const,
+      type: "page" as const,
+      title: "示例自定义页面",
+      body: { type: "list", children: [] },
+    },
+    data: { message: "这是 getFunctionPage 返回的示例页面。" },
+  };
 }
 
 // ---------------------------------------------------------------------------
 // fnPath 回调 — 设置页字段变更时调用
 // ---------------------------------------------------------------------------
 
-/** 示例：用户名/密码变更回调——建议在两次变更完后统一校验并登录 */
+/** 用户名/密码变更回调——建议在两次变更完后统一校验并登录 */
 async function onAuthChanged(
   payload: SettingChangedPayload<string> = { extern: {}, key: "", value: "" },
 ): Promise<Record<string, unknown>> {
   console.log("[onAuthChanged]", payload);
-  void payload;
+
+  // 示例：把当前值临时保存到配置中，提交时再统一读取
+  await pluginConfig.save(payload.key, JSON.stringify({ value: payload.value }));
+
+  // 示例：调用 Flutter Toast 提示用户
+  await flutterTools.showToast({
+    message: `${payload.key} 已更新`,
+    level: "info",
+    seconds: 2,
+  });
+
   return {};
 }
 
-/** 示例：记住密码开关变更回调 */
+/** 记住密码开关变更回调 */
 async function onRememberChanged(
   payload: SettingChangedPayload<boolean> = {
     extern: {},
@@ -862,31 +947,33 @@ async function onRememberChanged(
   },
 ): Promise<Record<string, unknown>> {
   console.log("[onRememberChanged]", payload);
+  await pluginConfig.save(payload.key, JSON.stringify({ value: payload.value }));
+
   if (payload.value) {
-    // 用户打开了"记住密码"，持久化凭据
+    // 用户打开了"记住密码"，这里可以读取 auth.account / auth.password 做持久化登录
   }
   return {};
 }
 
-/** 示例：主题变更回调 */
+/** 主题变更回调 */
 async function onThemeChanged(
   payload: SettingChangedPayload<string> = { extern: {}, key: "", value: "" },
 ): Promise<Record<string, unknown>> {
   console.log("[onThemeChanged]", payload);
-  void payload;
+  await pluginConfig.save(payload.key, JSON.stringify({ value: payload.value }));
   return {};
 }
 
-/** 示例：画质变更回调 */
+/** 画质变更回调 */
 async function onQualityChanged(
   payload: SettingChangedPayload<string> = { extern: {}, key: "", value: "" },
 ): Promise<Record<string, unknown>> {
   console.log("[onQualityChanged]", payload);
-  void payload;
+  await pluginConfig.save(payload.key, JSON.stringify({ value: payload.value }));
   return {};
 }
 
-/** 示例：成人内容开关变更回调 */
+/** 成人内容开关变更回调 */
 async function onAdultChanged(
   payload: SettingChangedPayload<boolean> = {
     extern: {},
@@ -895,11 +982,11 @@ async function onAdultChanged(
   },
 ): Promise<Record<string, unknown>> {
   console.log("[onAdultChanged]", payload);
-  void payload;
+  await pluginConfig.save(payload.key, JSON.stringify({ value: payload.value }));
   return {};
 }
 
-/** 示例：屏蔽标签多选变更回调 */
+/** 屏蔽标签多选变更回调 */
 async function onHiddenTagsChanged(
   payload: SettingChangedPayload<string[]> = {
     extern: {},
@@ -908,12 +995,19 @@ async function onHiddenTagsChanged(
   },
 ): Promise<Record<string, unknown>> {
   console.log("[onHiddenTagsChanged]", payload);
-  void payload;
+  await pluginConfig.save(payload.key, JSON.stringify({ value: payload.value }));
   return {};
 }
 
-/** 示例：清理插件缓存操作 */
+/** 清理插件缓存操作 */
 async function clearPluginCache(): Promise<Record<string, unknown>> {
+  // 示例：清理进程内缓存
+  await cache.set("search:example:1", null);
+  await flutterTools.showToast({
+    message: "缓存已清理",
+    level: "success",
+    seconds: 2,
+  });
   return { ok: true };
 }
 
@@ -922,8 +1016,11 @@ async function clearPluginCache(): Promise<Record<string, unknown>> {
 // ---------------------------------------------------------------------------
 
 export default {
-  // core
+  // lifecycle
+  init,
   getInfo,
+
+  // core
   searchComic,
   getComicDetail,
   getChapter,

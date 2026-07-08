@@ -2,7 +2,7 @@
 
 Breeze 插件示例工程，包含所有 API 类型的占位实现。新插件推荐直接 clone 本仓库进行改造。
 
-> **注** ：不应该主动修改types目录下的任何内容，types目录下的文件仅作为类型声明使用。
+本示例依赖 [`breeze-plugin-kit`](https://www.npmjs.com/package/breeze-plugin-kit) 提供类型声明和常用工具函数。
 
 ## 文档
 
@@ -69,6 +69,8 @@ git init
 ```
 
 然后修改 `src/common.ts` 的 `PLUGIN_ID` 和 `src/get-info.ts` 的插件信息。
+
+如需了解 `breeze-plugin-kit` 的 API 用法，参考插件开发文档的 [工具包章节](https://deretame.github.io/plugin-dev-docs/guide/plugin-kit)。
 
 ## 开发
 

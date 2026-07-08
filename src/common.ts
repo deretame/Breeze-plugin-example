@@ -1,5 +1,10 @@
 export const PLUGIN_ID = "00000000-0000-0000-0000-00000000e001";
-export const NOT_FOUND_IMAGE_URL = "";
+
+// 占位图片 URL：必须是有效格式的非空字符串，不能为 404 地址。
+// 宿主不会用它下载图片，但会校验格式。
+export const NOT_FOUND_IMAGE_URL =
+  "https://httpstat.us/200?identifier=placeholder";
+
 export const PLACEHOLDER_IMAGE_PATH = "placeholder/image-404.png";
 
 import type {
