@@ -9,12 +9,15 @@ export const PLACEHOLDER_IMAGE_PATH = "placeholder/image-404.png";
 
 import type {
   ActionItem,
+  ComicInfoPageAction,
   ComicListItem,
   ImageItem,
   MetadataListItem,
   PagingInfo,
   StringMap,
 } from "breeze-plugin-kit";
+
+const EMPTY_ACTION = {} as ComicInfoPageAction;
 
 export function toStringMap(value: unknown): StringMap {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -25,7 +28,7 @@ export function toStringMap(value: unknown): StringMap {
 
 export function createActionItem(
   name: unknown,
-  onTap: StringMap = {},
+  onTap: ComicInfoPageAction = EMPTY_ACTION,
   extern: StringMap = {},
 ): ActionItem {
   // Keep all action payloads normalized so downstream schema consumers do not

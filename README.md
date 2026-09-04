@@ -72,6 +72,30 @@ git init
 
 如需了解 `breeze-plugin-kit` 的 API 用法，参考插件开发文档的 [工具包章节](https://deretame.github.io/plugin-dev-docs/guide/plugin-kit)。
 
+## 图片裁剪工具
+
+`breeze-plugin-kit` 0.8.0 提供了图片裁剪类型和 `pictureTools.cropImageByRegions`：
+
+```ts
+import { pictureTools } from "breeze-plugin-kit";
+import type { ImageCropRegion } from "breeze-plugin-kit";
+
+async function cropPreviewSheet(imageData: Uint8Array) {
+  const regions: ImageCropRegion[] = [
+    { number: 1, x: 0, y: 0, width: 200, height: 300 },
+    { number: 2, x: 200, y: 0, width: 200, height: 300 },
+  ];
+
+  const images = await pictureTools.cropImageByRegions(imageData, regions);
+  return images.map(({ number, imgData }) => ({
+    number,
+    webpBytes: imgData,
+  }));
+}
+```
+
+`imageData` 支持 `Uint8Array`、`ArrayBuffer`、`ArrayBufferView` 和 `number[]`；每个裁剪区域使用左上角为原点的 `x`、`y`、`width`、`height`，返回的 `imgData` 是 WebP 格式的 `Uint8Array`。
+
 ## 开发
 
 ```bash
