@@ -272,9 +272,13 @@ async function getComicDetail(
     isFavourite: normalizedInfo.is_favorite,
     isLiked: normalizedInfo.liked,
     allowComments: false,
+    allowCommentsReason: "示例图源暂不支持评论",
     allowLike: false,
+    allowLikeReason: "示例图源暂不支持点赞",
     allowCollected: false,
+    allowCollectedReason: "示例图源暂不支持云端收藏",
     allowDownload: false,
+    allowDownloadReason: "示例图源暂不支持下载",
     extern: {},
   };
 
@@ -401,6 +405,15 @@ async function getReadSnapshot(
       })),
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// getDownloadConcurrency — 图片下载并发数（可选，不实现则宿主用 5）
+// ---------------------------------------------------------------------------
+
+/** 示例：自定义图片下载并发数，宿主会钳制到 1~32 */
+async function getDownloadConcurrency(): Promise<{ concurrency: number }> {
+  return { concurrency: 4 };
 }
 
 // ---------------------------------------------------------------------------
@@ -1027,6 +1040,7 @@ export default {
   getChapter,
   getReadSnapshot,
   fetchImageBytes,
+  getDownloadConcurrency,
 
   // social
   toggleLike,
