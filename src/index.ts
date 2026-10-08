@@ -38,13 +38,7 @@ import type {
   ToggleLikeResult,
   UserInfoBundleContract,
 } from "breeze-plugin-kit";
-import {
-  cache,
-  flutterTools,
-  opencc,
-  pluginConfig,
-  runtime,
-} from "breeze-plugin-kit";
+import { cache, flutterTools, opencc, pluginConfig, runtime } from "breeze-plugin-kit";
 import {
   NOT_FOUND_IMAGE_URL,
   PLUGIN_ID,
@@ -77,19 +71,13 @@ function buildExampleChapters(comicId: string): ChapterSummary[] {
 }
 
 /** 解析 requestId / chapterId 到具体章节 */
-function resolveChapterByRequestId(
-  chapters: ChapterSummary[],
-  input: unknown,
-): ChapterSummary {
+function resolveChapterByRequestId(chapters: ChapterSummary[], input: unknown): ChapterSummary {
   const id = String(input ?? "").trim();
   return chapters.find((c) => c.requestId === id || c.id === id) ?? chapters[0];
 }
 
 /** 构建示例章节图片 */
-function createChapterPages(
-  comicId: string,
-  storageChapterId: string,
-): ChapterPage[] {
+function createChapterPages(comicId: string, storageChapterId: string): ChapterPage[] {
   return [
     {
       id: "p-1",
@@ -146,14 +134,11 @@ async function getInfo(): Promise<InfoContract> {
 // ---------------------------------------------------------------------------
 
 /** 搜索漫画 — 关键字 / 分页 */
-async function searchComic(
-  payload: SearchComicPayload = {},
-): Promise<SearchResultContract> {
+async function searchComic(payload: SearchComicPayload = {}): Promise<SearchResultContract> {
   console.log("[searchComic]", payload);
   const extern = toStringMap(payload.extern);
   const page = Math.max(1, Number(payload.page ?? 1) || 1);
-  let keyword =
-    String(payload.keyword ?? extern.keyword ?? "").trim() || "example";
+  let keyword = String(payload.keyword ?? extern.keyword ?? "").trim() || "example";
 
   // 示例：使用 opencc 把繁体关键字转成简体再搜索（若目标站是简体）
   keyword = await opencc.convert(keyword, "t2s.json");
@@ -192,9 +177,7 @@ async function searchComic(
 // ---------------------------------------------------------------------------
 
 /** 漫画详情 — 基本信息 / 章节列表 / 推荐 */
-async function getComicDetail(
-  payload: ComicDetailPayload = {},
-): Promise<ComicDetailContract> {
+async function getComicDetail(payload: ComicDetailPayload = {}): Promise<ComicDetailContract> {
   console.log("[getComicDetail]", payload);
   const comicId = String(payload.comicId ?? "").trim();
   if (!comicId) throw new Error("comicId 不能为空");
@@ -306,9 +289,7 @@ async function getComicDetail(
 // ---------------------------------------------------------------------------
 
 /** 获取章节内容（下载用） — 返回该章的全部图片 */
-async function getChapter(
-  payload: ChapterPayload = {},
-): Promise<ChapterContentContract> {
+async function getChapter(payload: ChapterPayload = {}): Promise<ChapterContentContract> {
   console.log("[getChapter]", payload);
   const comicId = String(payload.comicId ?? "").trim();
   if (!comicId) throw new Error("comicId 不能为空");
@@ -362,9 +343,7 @@ async function getChapter(
 // ---------------------------------------------------------------------------
 
 /** 获取阅读快照 — 返回当前章节图片 + 章节导航列表 */
-async function getReadSnapshot(
-  payload: ReadSnapshotPayload = {},
-): Promise<ReadSnapshotContract> {
+async function getReadSnapshot(payload: ReadSnapshotPayload = {}): Promise<ReadSnapshotContract> {
   console.log("[getReadSnapshot]", payload);
   const comicId = String(payload.comicId ?? "").trim();
   if (!comicId) throw new Error("comicId 不能为空");
@@ -455,12 +434,10 @@ async function fetchImageBytes({
 // ---------------------------------------------------------------------------
 
 /** 点赞 / 取消点赞 */
-async function toggleLike(
-  payload: ToggleLikePayload = {},
-): Promise<ToggleLikeResult> {
+async function toggleLike(payload: ToggleLikePayload = {}): Promise<ToggleLikeResult> {
   console.log("[toggleLike]", payload);
   void payload;
-  return { liked: !Boolean(payload.currentLiked) };
+  return { liked: !payload.currentLiked };
 }
 
 // ---------------------------------------------------------------------------
@@ -468,12 +445,10 @@ async function toggleLike(
 // ---------------------------------------------------------------------------
 
 /** 收藏 / 取消收藏 */
-async function toggleFavorite(
-  payload: ToggleFavoritePayload = {},
-): Promise<ToggleFavoriteResult> {
+async function toggleFavorite(payload: ToggleFavoritePayload = {}): Promise<ToggleFavoriteResult> {
   console.log("[toggleFavorite]", payload);
   void payload;
-  return { favorited: !Boolean(payload.currentFavorite), nextStep: "none" };
+  return { favorited: !payload.currentFavorite, nextStep: "none" };
 }
 
 // ---------------------------------------------------------------------------
@@ -587,9 +562,7 @@ async function getComicListSceneBundle(): Promise<ComicListSceneBundleContract> 
 // ---------------------------------------------------------------------------
 
 /** 分页漫画列表（排行榜 / 最新 / 分类等共享此函数） */
-async function getRankingData(
-  _payload: SearchComicPayload = {},
-): Promise<ComicPagedListContract> {
+async function getRankingData(_payload: SearchComicPayload = {}): Promise<ComicPagedListContract> {
   console.log("[getRankingData]", _payload);
   const item = createComicItem("rank-1", "示例榜单漫画");
   return {
@@ -649,9 +622,7 @@ async function getRankingFilterBundle(): Promise<FilterBundleContract> {
 // ---------------------------------------------------------------------------
 
 /** 获取评论列表 */
-async function getCommentFeed(
-  _payload: CommentFeedPayload = {},
-): Promise<CommentFeedContract> {
+async function getCommentFeed(_payload: CommentFeedPayload = {}): Promise<CommentFeedContract> {
   console.log("[getCommentFeed]", _payload);
   const comment: CommentItem = {
     id: "c-1",
@@ -702,9 +673,7 @@ async function loadCommentReplies(
 // ---------------------------------------------------------------------------
 
 /** 发送评论 */
-async function postComment(
-  _payload: CommentPostPayload = {},
-): Promise<CommentMutationContract> {
+async function postComment(_payload: CommentPostPayload = {}): Promise<CommentMutationContract> {
   console.log("[postComment]", _payload);
   return {
     source: PLUGIN_ID,
@@ -877,9 +846,7 @@ async function getCapabilitiesBundle(): Promise<CapabilitiesBundleContract> {
     scheme: {
       version: "1.0.0" as const,
       type: "capabilities" as const,
-      actions: [
-        { key: "clear", title: "清理插件缓存", fnPath: "clearPluginCache" },
-      ],
+      actions: [{ key: "clear", title: "清理插件缓存", fnPath: "clearPluginCache" }],
     },
     data: {},
   };

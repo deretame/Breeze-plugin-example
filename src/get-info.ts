@@ -6,12 +6,8 @@ export function buildPluginInfo(): InfoContract {
     name: "Example Plugin",
     uuid: PLUGIN_ID,
     iconUrl: "https://httpstat.us/404",
-    creator: {
-      name: "example",
-      describe: "占位作者信息",
-    },
     describe: "Breeze 插件示例工程（含全部类型示例）",
-    version: "0.1.0",
+    version: "0.1.1",
     home: "https://example.com",
     updateUrl: "https://httpstat.us/404",
     npmName: "breeze-plugin-example",
