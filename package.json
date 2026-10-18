@@ -2,7 +2,7 @@
   "name": "breeze-plugin-example",
   "version": "0.1.1",
   "type": "module",
-  "packageManager": "pnpm@12.5.0",
+  "packageManager": "pnpm@12.14.0",
   "files": [
     "dist"
   ],
