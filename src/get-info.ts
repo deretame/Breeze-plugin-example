@@ -7,7 +7,7 @@ export function buildPluginInfo(): InfoContract {
     uuid: PLUGIN_ID,
     iconUrl: "https://httpstat.us/404",
     describe: "Breeze 插件示例工程（含全部类型示例）",
-    version: "0.1.1",
+    version: "0.2.0",
     home: "https://example.com",
     updateUrl: "https://httpstat.us/404",
     npmName: "breeze-plugin-example",
