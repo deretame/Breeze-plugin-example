@@ -6,7 +6,7 @@ Breeze 插件示例工程，包含所有 API 类型的占位实现。新插件�
 
 ## 文档
 
-插件开发文档：[https://deretame.github.io/plugin-dev-docs/](https://deretame.github.io/plugin-dev-docs/)
+插件开发文档：[https://breeze-project-org.github.io/plugin-dev-docs/](https://breeze-project-org.github.io/plugin-dev-docs/)
 
 ## 已导出的 fnPath
 
@@ -70,7 +70,7 @@ git init
 
 然后修改 `src/common.ts` 的 `PLUGIN_ID` 和 `src/get-info.ts` 的插件信息。
 
-如需了解 `breeze-plugin-kit` 的 API 用法，参考插件开发文档的 [工具包章节](https://deretame.github.io/plugin-dev-docs/guide/plugin-kit)。
+如需了解 `breeze-plugin-kit` 的 API 用法，参考插件开发文档的 [工具包章节](https://breeze-project-org.github.io/plugin-dev-docs/guide/plugin-kit)。
 
 ## 图片裁剪工具
 
